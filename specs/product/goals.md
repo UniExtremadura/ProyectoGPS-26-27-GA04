@@ -8,26 +8,17 @@ hemos logrado, y qué hemos decidido dejar fuera para no perder el foco.
 
 | ID | Objetivo | En qué se nota |
 |---|---|---|
-| G-01 | El técnico tiene independencia | Puede consultar si
-una pieza está disponible y solicitarla sin llamar a nadie ni escribir
-un correo. |
-| G-02 | El almacén deja de gestionar a ciegas | Sabe en todo momento
-qué stock tiene realmente y qué solicitudes tiene pendientes de
-resolver. |
-| G-03 | Sistema en tiempo real |
-Las actualizaciones de inventario se hacen en tiempo real para evitar que varios técnicos realicen las mismas solicitudes solapándose. |
+| G-01 | El técnico tiene independencia | Puede consultar si una pieza está disponible y solicitarla sin llamar a nadie ni escribir un correo. |
+| G-02 | El almacén deja de gestionar a ciegas | Sabe en todo momento qué stock tiene realmente y qué solicitudes tiene pendientes de resolver. |
+| G-03 | Sistema en tiempo real | Las actualizaciones de inventario se hacen en tiempo real para evitar que varios técnicos realicen las mismas solicitudes solapándose. |
 
 ## Cómo sabremos que lo hemos conseguido
 
 | ID | Objetivo | Umbral |
 |---|---|---|
-| M-01 | G-01 | 4 de cada 5 personas que probamos el sistema completan
-una solicitud de pieza en menos de 5 minutos sin que nadie les ayude.
-|
-| M-02 | G-02 | 4 de cada 5 personas entienden correctamente en qué
-estado está el stock y sus solicitudes. |
-| M-03 | Todos | No queda abierto ningún defecto que bloquee el uso
-normal del sistema en la revisión final. |
+| M-01 | G-01 | 4 de cada 5 personas que probamos el sistema completan una solicitud de pieza en menos de 5 minutos sin que nadie les ayude. |
+| M-02 | G-02 | 4 de cada 5 personas entienden correctamente en qué estado está el stock y sus solicitudes. |
+| M-03 | Todos | No queda abierto ningún defecto que bloquee el uso normal del sistema en la revisión final. |
 
 ## Qué entra en esta primera versión
 - Un recorrido completo y coherente para que un técnico consulte y solicite
