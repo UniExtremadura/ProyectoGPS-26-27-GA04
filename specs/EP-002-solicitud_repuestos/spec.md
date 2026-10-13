@@ -17,13 +17,13 @@ Un técnico de mantenimiento puede solicitar de manera autónoma un repuesto dis
 **Predecessors:** US-001 
 **Initial plan:** IT-001 
  
-#### Criterios de Aceptación 
-- **US-002-AC-01:** El sistema debe requerir obligatoriamente la selección de una pieza del inventario y la introducción de un código o identificador de la tarea de mantenimiento asociada. 
-- **US-002-AC-02:** El sistema debe bloquear el envío de la solicitud si la cantidad requerida es mayor que el stock actualmente disponible. 
-- **US-002-AC-03:** Al enviarse y guardarse con éxito, el sistema genera y muestra una referencia alfanumérica única (ej. `REQ-1042`) y el estado inicial es "Pendiente". 
+#### Criterios de Aceptación
+- **US-002-AC-01:** El sistema debe requerir la selección de una pieza, indicar la cantidad deseada y añadir la tarea de mantenimiento asociada.
+- **US-002-AC-02:** El sistema bloquea el envío si la cantidad requerida es mayor que el stock actualmente disponible.
+- **US-002-AC-03:** Al enviarse, se genera una referencia (ej. REQ-1042) con estado "Pendiente".
  
 #### Verificación y Restricciones 
-- **Reglas de negocio:** Una solicitud no reserva el stock de forma definitiva hasta que es aceptada por el almacén, pero el sistema debe alertar si el stock es crítico. 
+- **Reglas de negocio:** En estado "Pendiente", la solicitud no reserva stock. La reserva virtual se consolida únicamente cuando el almacén la pasa a estado "Aceptada" (US-005). 
 - **Restricciones:** No se usarán datos reales de unidades o tareas militares clasificadas; toda entrada de tarea será tratada como texto libre o ficticio. 
 - **Requisitos No Funcionales (NFRs):**  
   - *Fiabilidad:* La generación del código de referencia debe ser transaccional (no pueden existir dos solicitudes con la misma referencia). 
