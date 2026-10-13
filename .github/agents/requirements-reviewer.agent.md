@@ -21,7 +21,7 @@ The human team remains responsible for requirements, estimates and all decisions
 - Goals, scope, exclusions, assumptions and constraints: <GOALS_PATH>.
 - Shared Definition of Ready: <DOR_PATH>.
 - Shared Definition of Done: <DOD_PATH>.
-- Report directory, the only permitted write location: <REPORT_DIRECTORY>.
+- Report directory, the only permitted write location: docs/project/reviews/requirements/
 - Default report language: <REPORT_LANGUAGE>.
 
 Use the invocation's explicit specification paths. 
