@@ -43,10 +43,10 @@ El personal de almacén visualiza las peticiones entrantes, toma decisiones docu
 **Predecessors:** US-004 
 **Initial plan:** IT-002 
  
-#### Criterios de Aceptación 
-- **US-005-AC-01:** En la vista de detalle de una solicitud "Pendiente", deben existir dos acciones claras: "Aceptar" (verde) y "Rechazar" (rojo). 
-- **US-005-AC-02:** Al pulsar "Aceptar", el estado de la solicitud cambia a "Aceptada" y la pieza queda virtualmente reservada. 
-- **US-005-AC-03:** Al pulsar "Rechazar", el estado pasa a "Rechazada". 
+#### Criterios de Aceptación
+- **US-005-AC-01:** En la vista de detalle de una solicitud "Pendiente", existen las acciones "Aceptar" y "Rechazar".
+- **US-005-AC-02:** Al pulsar "Aceptar", el estado pasa a "Aceptada" y la cantidad solicitada queda reservada virtualmente, impidiendo que otro técnico la pida.
+- **US-005-AC-03:** Al pulsar "Rechazar", el sistema obliga a introducir un motivo escrito (US-010) antes de cambiar el estado a "Rechazada".
  
 #### Verificación y Restricciones 
 - **Reglas de negocio:** Una solicitud "Rechazada" es un estado final. No puede volver a abrirse. 
@@ -72,7 +72,7 @@ El personal de almacén visualiza las peticiones entrantes, toma decisiones docu
 #### Criterios de Aceptación 
 - **US-006-AC-01:** Solo las solicitudes en estado "Aceptada" pueden mostrar el botón "Marcar como Entregada". 
 - **US-006-AC-02:** Al confirmar la entrega, el estado de la solicitud pasa a "Entregada" (estado final). 
-- **US-006-AC-03:** El sistema debe restar automáticamente 1 unidad al stock disponible de la pieza correspondiente en la base de datos de inventario. 
+- **US-006-AC-03:** El sistema debe restar automáticamente la cantidad solicitada (no solo 1 unidad) 
  
 #### Verificación y Restricciones 
 - **Reglas de negocio:** El stock nunca puede llegar a ser un número negativo tras una entrega. 
@@ -127,7 +127,7 @@ El personal de almacén visualiza las peticiones entrantes, toma decisiones docu
 **Priority:** Should have 
 **Estimate:** 3,0 h-p 
 **Uncertainty:** Low 
-**Predecessors:** US-005 
+**Predecessors:** Ninguno (Se ejecuta simultáneamente como parte del flujo de la US-005)
 **Initial plan:** Por definir 
  
 #### Criterios de Aceptación 
