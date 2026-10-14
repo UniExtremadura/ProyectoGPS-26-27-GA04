@@ -36,7 +36,7 @@ an Excel workbook, ProjectLibre file, plan.md or tasks.md.
   assessed: state this and ask for the XML export instead of guessing its content.
 - Optional planning inputs (CONSISTENCY mode): docs/project/Libro.xlsx and the latest
   report in docs/project/reviews/initial-planning/
-- Permitted report directory: docs/project/reviews/
+- Permitted report directory: docs/project/reviews/project-libre/
 - Report basename: projectlibre-plan-review-vNN.md
 - Default report language: Spanish.
 - Default mode: VALIDATION.
