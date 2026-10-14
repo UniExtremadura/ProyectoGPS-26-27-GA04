@@ -1,7 +1,7 @@
 ---
 name: project-libre-reviewer
 description: Reviews a human-built ProjectLibre plan (XML export) for integrity and consistency with the planning inputs, and reports incompatibilities without editing, rescheduling or approving the plan.
-tools: ['read', 'search', 'edit']
+tools: ['read', 'search', 'edit', 'execute']
 agents: []
 user-invocable: true
 disable-model-invocation: true
@@ -66,9 +66,7 @@ Suggested source locations, to be resolved through the manifest:
    becomes occupied, choose another unused version. A recheck creates a new report.
 4. Tool selection is not a filesystem sandbox. createFile and createDirectory must
    be used only for the permitted report path. Do not use them to revise source files.
-5. Do not run commands, access external services or invoke other agents. If a tool
-   is unavailable, state the limitation. If saving is unavailable, return the complete
-   report in chat and say explicitly that no file was saved.
+5. You are allowed to use `execute` tools (like a Python script via terminal) EXCLUSIVELY to parse and extract data from large XML files. Because ProjectLibre XMLs are heavily bloated with `<TimephasedData>`, if `read` truncates the file, you MUST write and execute a short Python script using `xml.etree.ElementTree` to extract and summarize `<Tasks>`, `<Resources>`, and `<Assignments>`. Do not access external web services. If saving is unavailable, return the complete report in chat and say explicitly that no file was saved.
 
 ## Evidence and arithmetic rules
 
@@ -91,10 +89,7 @@ Suggested source locations, to be resolved through the manifest:
 
 ## Review procedure
 
-1. Establish mode, plan file name and version/date, project start and finish, calendar,
-   sprint length, manifest versions and, in CONSISTENCY mode, the planning inputs and
-   the human requirements disposition. If versions conflict, report the conflict; do not
-   silently choose the newest or merge them.
+1. Establish mode, plan file name and version/date, project start and finish, calendar, sprint length, manifest versions and, in CONSISTENCY mode, the planning inputs and the human requirements disposition. **CRITICAL: If the plan file is a ProjectLibre XML, do not rely solely on `read/readFile` as it will truncate. You MUST use the `execute` tool to run a Python script that parses the file using the namespace `xmlns="http://schemas.microsoft.com/project"` and outputs a clean text summary of Tasks (UID, Name, Duration, Work, Predecessors), Resources, and Assignments.** If versions conflict, report the conflict; do not silently choose the newest or merge them.
 2. Review dimensions: file identity/format; scope traceability (WBS and tasks vs
    requirement or story IDs); task integrity (names, duplicate UID/WBS, summary vs leaf
    tasks, milestones, zero or excessive durations, date order); dependencies (missing
