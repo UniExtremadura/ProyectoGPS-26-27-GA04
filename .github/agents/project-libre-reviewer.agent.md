@@ -86,6 +86,7 @@ Suggested source locations, to be resolved through the manifest:
   at save time. Report them as stored; do not recompute a full schedule. State when a
   check is a bounded or partial verification, or when manual scheduling mode, constraints
   or stale values may make stored values unreliable.
+- CRITICAL PROJECTLIBRE EXCEPTIONS: ProjectLibre generates hidden personal calendars (UIDs 4-8, etc.) and assigns the ID `-65535` to summary tasks/folders upon XML export. You MUST ignore missing calendar definitions if the Base Calendar (UID 1) is present. You MUST ignore any assignments or capacity warnings related to ResourceUID `-65535`, as it is a non-human structural container, not a real over-allocation or missing resource.
 
 ## Review procedure
 
