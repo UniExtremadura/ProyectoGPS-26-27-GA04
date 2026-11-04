@@ -81,7 +81,8 @@ function renderizarTablaCatalogo(lista) {
             "<td>" + p.nombre + "</td>" +
             "<td>" + p.categoria + "</td>" +
             "<td>" + p.stock + "</td>" +
-            "<td><span class=\"badge " + badgeClass + "\">" + badgeText + "</span></td>";
+            "<td><span class=\"badge " + badgeClass + "\">" + badgeText + "</span></td>" +
+            "<td><a class=\"btn btn-sm\" href=\"solicitar.html?pieza=" + encodeURIComponent(p.codigo) + "\">Solicitar</a></td>";
         tbody.appendChild(tr);
     });
 }
@@ -104,4 +105,124 @@ function inicializarVistaCatalogo() {
 document.addEventListener("DOMContentLoaded", function() {
     inicializarDatos();
     inicializarVistaCatalogo();
+});
+
+// === US-002-S2: Modelo de solicitud y función crearSolicitud() ===
+function obtenerSolicitudes() {
+    const raw = localStorage.getItem("centinela_solicitudes");
+    return raw ? JSON.parse(raw) : [];
+}
+
+function guardarSolicitudes(lista) {
+    localStorage.setItem("centinela_solicitudes", JSON.stringify(lista));
+}
+
+function crearSolicitud(datos) {
+    const piezas = obtenerPiezas();
+    const piezaObj = piezas.find(function(p) { return p.codigo === datos.pieza; });
+    const cantidadNum = Number(datos.cantidad);
+    const tareaTexto = String(datos.tarea || "").trim();
+
+    const errores = {};
+    if (!piezaObj) {
+        errores.pieza = "Debe seleccionar una pieza existente en el catálogo.";
+    }
+    if (!Number.isInteger(cantidadNum) || cantidadNum < 1) {
+        errores.cantidad = "La cantidad debe ser un número entero mayor o igual a 1.";
+    }
+    if (!tareaTexto) {
+        errores.tarea = "La tarea de mantenimiento asociada es obligatoria.";
+    }
+
+    if (Object.keys(errores).length > 0) {
+        return { exito: false, errores: errores };
+    }
+
+    const solicitudes = obtenerSolicitudes();
+    const nuevoId = "SOL-" + String(solicitudes.length + 1).padStart(3, "0");
+    const nuevaSolicitud = {
+        id: nuevoId,
+        pieza: piezaObj.codigo,
+        nombrePieza: piezaObj.nombre,
+        cantidad: cantidadNum,
+        tarea: tareaTexto,
+        solicitante: USUARIO_ACTUAL,
+        estado: "Pendiente",
+        fecha: new Date().toISOString().split("T")[0]
+    };
+
+    solicitudes.push(nuevaSolicitud);
+    guardarSolicitudes(solicitudes);
+    return { exito: true, solicitud: nuevaSolicitud };
+}
+
+function inicializarVistaSolicitar() {
+    const form = document.getElementById("formSolicitud");
+    const selectPieza = document.getElementById("selectPieza");
+    if (!form || !selectPieza) {
+        return;
+    }
+
+    const piezas = obtenerPiezas();
+    selectPieza.innerHTML = '<option value="">-- Seleccione una pieza --</option>';
+    piezas.forEach(function(p) {
+        const opt = document.createElement("option");
+        opt.value = p.codigo;
+        opt.textContent = p.codigo + " — " + p.nombre + " (Stock: " + p.stock + ")";
+        selectPieza.appendChild(opt);
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    const piezaPre = params.get("pieza");
+    if (piezaPre) {
+        selectPieza.value = piezaPre;
+    }
+
+    form.addEventListener("submit", function(ev) {
+        ev.preventDefault();
+        const errPieza = document.getElementById("errorPieza");
+        const errCantidad = document.getElementById("errorCantidad");
+        const errTarea = document.getElementById("errorTarea");
+        const alerta = document.getElementById("alertaFormulario");
+
+        errPieza.style.display = "none";
+        errCantidad.style.display = "none";
+        errTarea.style.display = "none";
+        alerta.style.display = "none";
+
+        const resultado = crearSolicitud({
+            pieza: selectPieza.value,
+            cantidad: document.getElementById("inputCantidad").value,
+            tarea: document.getElementById("inputTarea").value
+        });
+
+        if (!resultado.exito) {
+            if (resultado.errores.pieza) {
+                errPieza.textContent = resultado.errores.pieza;
+                errPieza.style.display = "block";
+            }
+            if (resultado.errores.cantidad) {
+                errCantidad.textContent = resultado.errores.cantidad;
+                errCantidad.style.display = "block";
+            }
+            if (resultado.errores.tarea) {
+                errTarea.textContent = resultado.errores.tarea;
+                errTarea.style.display = "block";
+            }
+            alerta.className = "alert alert-error";
+            alerta.textContent = "Por favor, corrija los errores del formulario antes de continuar.";
+            alerta.style.display = "block";
+            return;
+        }
+
+        alerta.className = "alert alert-success";
+        alerta.textContent = "Solicitud " + resultado.solicitud.id + " registrada correctamente en estado Pendiente.";
+        alerta.style.display = "block";
+        document.getElementById("inputCantidad").value = "1";
+        document.getElementById("inputTarea").value = "";
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    inicializarVistaSolicitar();
 });
