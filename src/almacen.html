@@ -101,6 +101,52 @@
             </div>
             <button type="submit" class="btn btn-success" id="btnGuardarPieza">Guardar</button>
         </form>
+
+        <h2 style="margin-top:32px;">Ajuste Manual de Stock en Inventario</h2>
+        <div id="alertaInventario" style="display:none;"></div>
+        <table id="tablaInventarioAlmacen">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Stock actual</th>
+                    <th>Nuevo stock</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyInventarioAlmacen">
+                <tr>
+                    <td>P-001</td>
+                    <td>Rodamiento axial de bolas</td>
+                    <td>Mecánica</td>
+                    <td>12</td>
+                    <td><input type="number" min="0" value="12" style="width:100px;"></td>
+                    <td><button class="btn btn-sm">Ajustar</button></td>
+                </tr>
+            </tbody>
+        </table>
+<<<<<<< HEAD
+    </div>
+    <!-- Modal de motivo de rechazo (US-010-S1) -->
+    <div id="modalRechazo" class="modal-backdrop">
+        <div class="modal">
+            <h3>Motivo del rechazo</h3>
+            <p>Indique el motivo obligatorio para rechazar la solicitud <strong id="modalRechazoId"></strong>:</p>
+            <div class="form-group">
+                <textarea id="inputMotivoRechazo" rows="4" maxlength="200" placeholder="Escriba el motivo del rechazo (máx. 200 caracteres)..."></textarea>
+                <div style="text-align:right; font-size:0.8rem; color:#64748b;">
+                    <span id="contadorMotivo">0</span> / 200 caracteres
+                </div>
+                <div id="errorMotivoRechazo" class="field-error">El motivo del rechazo es obligatorio y no puede estar vacío.</div>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button type="button" class="btn btn-secondary" id="btnCancelarModalRechazo">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmarModalRechazo">Confirmar</button>
+            </div>
+        </div>
+=======
+>>>>>>> origin/develop
     </div>
     <script src="app.js"></script>
 </body>
