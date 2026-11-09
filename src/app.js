@@ -226,3 +226,104 @@ function inicializarVistaSolicitar() {
 document.addEventListener("DOMContentLoaded", function() {
     inicializarVistaSolicitar();
 });
+
+// === US-003-S2: Consulta de solicitudes propias (obtenerSolicitudesDeUsuario) ===
+const SOLICITUDES_MOCK_INICIALES = [
+    {
+        id: "SOL-001",
+        pieza: "P-009",
+        nombrePieza: "Junta tórica de nitrilo",
+        cantidad: 4,
+        tarea: "OT-095 Sellado circuito secundario",
+        solicitante: USUARIO_ACTUAL,
+        estado: "Entregada",
+        fecha: "2026-10-18"
+    },
+    {
+        id: "SOL-002",
+        pieza: "P-003",
+        nombrePieza: "Sensor inductivo de proximidad",
+        cantidad: 1,
+        tarea: "OT-099 Sustitución sensor puerta",
+        solicitante: USUARIO_ACTUAL,
+        estado: "Aceptada",
+        fecha: "2026-10-20"
+    },
+    {
+        id: "SOL-003",
+        pieza: "P-001",
+        nombrePieza: "Rodamiento axial de bolas",
+        cantidad: 2,
+        tarea: "OT-101 Ajuste eje principal",
+        solicitante: USUARIO_ACTUAL,
+        estado: "Pendiente",
+        fecha: "2026-10-22"
+    }
+];
+
+function inicializarSolicitudesMock() {
+    if (!localStorage.getItem("centinela_solicitudes")) {
+        guardarSolicitudes(SOLICITUDES_MOCK_INICIALES);
+    }
+}
+
+function obtenerSolicitudesDeUsuario(usuario) {
+    inicializarSolicitudesMock();
+    const todas = obtenerSolicitudes();
+    return todas
+        .filter(function(s) { return s.solicitante === usuario; })
+        .slice()
+        .sort(function(a, b) {
+            if (a.fecha !== b.fecha) {
+                return b.fecha.localeCompare(a.fecha);
+            }
+            return b.id.localeCompare(a.id);
+        });
+}
+
+function obtenerClaseEstado(estado) {
+    const mapa = {
+        "Pendiente": "badge-pendiente",
+        "Aceptada": "badge-aceptada",
+        "Entregada": "badge-entregada",
+        "Rechazada": "badge-sinstock",
+        "Cancelada": "badge-cancelada"
+    };
+    return mapa[estado] || "badge-pendiente";
+}
+
+function renderizarMisSolicitudes() {
+    const tbody = document.getElementById("tbodyMisSolicitudes");
+    const msgVacio = document.getElementById("mensajeSinMisSolicitudes");
+    if (!tbody) {
+        return;
+    }
+    const lista = obtenerSolicitudesDeUsuario(USUARIO_ACTUAL);
+    tbody.innerHTML = "";
+    if (lista.length === 0) {
+        if (msgVacio) {
+            msgVacio.style.display = "block";
+        }
+        return;
+    }
+    if (msgVacio) {
+        msgVacio.style.display = "none";
+    }
+    lista.forEach(function(s) {
+        const tr = document.createElement("tr");
+        const badgeClass = obtenerClaseEstado(s.estado);
+        tr.innerHTML =
+            "<td>" + s.id + "</td>" +
+            "<td>" + s.pieza + " — " + (s.nombrePieza || "") + "</td>" +
+            "<td>" + s.cantidad + "</td>" +
+            "<td>" + s.tarea + "</td>" +
+            "<td>" + s.fecha + "</td>" +
+            "<td><span class=\"badge " + badgeClass + "\">" + s.estado + "</span></td>";
+        tbody.appendChild(tr);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    inicializarSolicitudesMock();
+    renderizarMisSolicitudes();
+});
