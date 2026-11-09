@@ -318,7 +318,8 @@ function renderizarMisSolicitudes() {
             "<td>" + s.cantidad + "</td>" +
             "<td>" + s.tarea + "</td>" +
             "<td>" + s.fecha + "</td>" +
-            "<td><span class=\"badge " + badgeClass + "\">" + s.estado + "</span></td>";
+            "<td><span class=\"badge " + badgeClass + "\">" + s.estado + "</span></td>" +
+            "<td>" + (s.estado === "Pendiente" ? "<button class=\"btn btn-danger btn-sm\" onclick=\"manejarCancelarSolicitud('" + s.id + "')\">Cancelar</button>" : "—") + "</td>";
         tbody.appendChild(tr);
     });
 }
@@ -607,3 +608,93 @@ function inicializarFormularioNuevaPieza() {
 document.addEventListener("DOMContentLoaded", function() {
     inicializarFormularioNuevaPieza();
 });
+
+// === US-008-S2: Ajuste manual de stock (ajustarStock) ===
+function ajustarStock(codigo, nuevaCantidad) {
+    const piezas = obtenerPiezas();
+    const pieza = piezas.find(function(p) { return p.codigo.toUpperCase() === String(codigo).toUpperCase(); });
+    if (!pieza) {
+        return { exito: false, mensaje: "La pieza indicada no existe." };
+    }
+    const cantNum = Number(nuevaCantidad);
+    if (nuevaCantidad === "" || !Number.isInteger(cantNum) || cantNum < 0) {
+        return { exito: false, mensaje: "El nuevo stock debe ser un número entero mayor o igual a 0." };
+    }
+    const diferencia = cantNum - pieza.stock;
+    const res = modificarStock(codigo, diferencia);
+    if (!res.exito) {
+        return res;
+    }
+    return {
+        exito: true,
+        mensaje: "Stock de " + pieza.codigo + " actualizado a " + cantNum + " unidades."
+    };
+}
+
+function renderizarInventarioAlmacen() {
+    const tbody = document.getElementById("tbodyInventarioAlmacen");
+    if (!tbody) {
+        return;
+    }
+    const piezas = obtenerPiezas();
+    tbody.innerHTML = "";
+    piezas.forEach(function(p) {
+        const tr = document.createElement("tr");
+        tr.innerHTML =
+            "<td>" + p.codigo + "</td>" +
+            "<td>" + p.nombre + "</td>" +
+            "<td>" + p.categoria + "</td>" +
+            "<td>" + p.stock + "</td>" +
+            "<td><input type=\"number\" id=\"inputStock_" + p.codigo + "\" min=\"0\" step=\"1\" value=\"" + p.stock + "\" style=\"width:100px;\"></td>" +
+            "<td><button class=\"btn btn-sm\" onclick=\"manejarAjusteStock('" + p.codigo + "')\">Ajustar</button></td>";
+        tbody.appendChild(tr);
+    });
+}
+
+function manejarAjusteStock(codigo) {
+    const input = document.getElementById("inputStock_" + codigo);
+    const alerta = document.getElementById("alertaInventario");
+    if (!input || !alerta) {
+        return;
+    }
+    const res = ajustarStock(codigo, input.value);
+    alerta.className = res.exito ? "alert alert-success" : "alert alert-error";
+    alerta.textContent = res.mensaje;
+    alerta.style.display = "block";
+    renderizarInventarioAlmacen();
+    renderizarPendientesAlmacen();
+    renderizarAceptadasAlmacen();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    renderizarInventarioAlmacen();
+});
+
+// === US-009-S2: Cancelar una solicitud propia pendiente (cancelarSolicitud) ===
+function cancelarSolicitud(id, usuario) {
+    const solicitudes = obtenerSolicitudes();
+    const sol = solicitudes.find(function(s) { return s.id === id; });
+    if (!sol) {
+        return { exito: false, mensaje: "La solicitud no existe." };
+    }
+    if (sol.solicitante !== usuario) {
+        return { exito: false, mensaje: "Solo puedes cancelar tus propias solicitudes." };
+    }
+    if (sol.estado !== "Pendiente") {
+        return { exito: false, mensaje: "Solo se pueden cancelar solicitudes en estado Pendiente." };
+    }
+    sol.estado = "Cancelada";
+    guardarSolicitudes(solicitudes);
+    return { exito: true, mensaje: "Solicitud " + id + " cancelada correctamente." };
+}
+
+function manejarCancelarSolicitud(id) {
+    const res = cancelarSolicitud(id, USUARIO_ACTUAL);
+    const alerta = document.getElementById("alertaMisSolicitudes");
+    if (alerta) {
+        alerta.className = res.exito ? "alert alert-success" : "alert alert-error";
+        alerta.textContent = res.mensaje;
+        alerta.style.display = "block";
+    }
+    renderizarMisSolicitudes();
+}
