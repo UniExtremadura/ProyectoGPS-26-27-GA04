@@ -327,3 +327,61 @@ document.addEventListener("DOMContentLoaded", function() {
     inicializarSolicitudesMock();
     renderizarMisSolicitudes();
 });
+
+// === US-004-S2: Listado de solicitudes pendientes en almacén (obtenerSolicitudesPendientes) ===
+function obtenerSolicitudesPendientes() {
+    inicializarSolicitudesMock();
+    const solicitudes = obtenerSolicitudes();
+    const piezas = obtenerPiezas();
+    return solicitudes
+        .filter(function(s) { return s.estado === "Pendiente"; })
+        .slice()
+        .sort(function(a, b) {
+            if (a.fecha !== b.fecha) {
+                return a.fecha.localeCompare(b.fecha);
+            }
+            return a.id.localeCompare(b.id);
+        })
+        .map(function(s) {
+            const p = piezas.find(function(item) { return item.codigo === s.pieza; });
+            return Object.assign({}, s, {
+                stockActual: p ? p.stock : 0
+            });
+        });
+}
+
+function renderizarPendientesAlmacen() {
+    const tbody = document.getElementById("tbodyPendientesAlmacen");
+    const msgVacio = document.getElementById("mensajeSinPendientes");
+    if (!tbody) {
+        return;
+    }
+    const pendientes = obtenerSolicitudesPendientes();
+    tbody.innerHTML = "";
+    if (pendientes.length === 0) {
+        if (msgVacio) {
+            msgVacio.style.display = "block";
+        }
+        return;
+    }
+    if (msgVacio) {
+        msgVacio.style.display = "none";
+    }
+    pendientes.forEach(function(s) {
+        const tr = document.createElement("tr");
+        tr.innerHTML =
+            "<td>" + s.id + "</td>" +
+            "<td>" + s.solicitante + "</td>" +
+            "<td>" + s.pieza + " — " + (s.nombrePieza || "") + "</td>" +
+            "<td>" + s.cantidad + "</td>" +
+            "<td>" + s.tarea + "</td>" +
+            "<td>" + s.fecha + "</td>" +
+            "<td>" + s.stockActual + "</td>" +
+            "<td class=\"celda-acciones\" data-id=\"" + s.id + "\"></td>";
+        tbody.appendChild(tr);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    renderizarPendientesAlmacen();
+});
