@@ -387,6 +387,7 @@ function renderizarPendientesAlmacen() {
 
 document.addEventListener("DOMContentLoaded", function() {
     renderizarPendientesAlmacen();
+    if (typeof renderizarAceptadasAlmacen === 'function') { renderizarAceptadasAlmacen(); }
 });
 
 // === US-005-S2: Aceptar y rechazar solicitudes pendientes ===
@@ -426,10 +427,92 @@ function manejarAceptarSolicitud(id) {
     const res = aceptarSolicitud(id);
     mostrarAlertaAlmacen(res.exito, res.mensaje);
     renderizarPendientesAlmacen();
+    if (typeof renderizarAceptadasAlmacen === 'function') { renderizarAceptadasAlmacen(); }
 }
 
 function manejarRechazarSolicitud(id) {
     const res = rechazarSolicitud(id);
     mostrarAlertaAlmacen(res.exito, res.mensaje);
     renderizarPendientesAlmacen();
+    if (typeof renderizarAceptadasAlmacen === 'function') { renderizarAceptadasAlmacen(); }
 }
+
+// === US-006-S2: Función centralizada modificarStock y entregarSolicitud ===
+function modificarStock(codigo, deltaCantidad) {
+    const piezas = obtenerPiezas();
+    const pieza = piezas.find(function(p) { return p.codigo.toUpperCase() === String(codigo).toUpperCase(); });
+    if (!pieza) {
+        return { exito: false, mensaje: "Pieza no encontrada" };
+    }
+    const nuevoStock = pieza.stock + Number(deltaCantidad);
+    if (nuevoStock < 0) {
+        return { exito: false, mensaje: "Stock insuficiente" };
+    }
+    pieza.stock = nuevoStock;
+    guardarPiezas(piezas);
+    return { exito: true, stockResultante: nuevoStock, pieza: pieza };
+}
+
+function entregarSolicitud(id) {
+    const solicitudes = obtenerSolicitudes();
+    const sol = solicitudes.find(function(s) { return s.id === id; });
+    if (!sol || sol.estado !== "Aceptada") {
+        return { exito: false, mensaje: "Solo se pueden entregar solicitudes en estado Aceptada." };
+    }
+    const resultadoStock = modificarStock(sol.pieza, -sol.cantidad);
+    if (!resultadoStock.exito) {
+        return { exito: false, mensaje: "Stock insuficiente" };
+    }
+    sol.estado = "Entregada";
+    guardarSolicitudes(solicitudes);
+    return {
+        exito: true,
+        mensaje: "Solicitud " + id + " entregada. Nuevo stock de " + sol.pieza + ": " + resultadoStock.stockResultante + " uds."
+    };
+}
+
+function renderizarAceptadasAlmacen() {
+    const tbody = document.getElementById("tbodyAceptadasAlmacen");
+    const msgVacio = document.getElementById("mensajeSinAceptadas");
+    if (!tbody) {
+        return;
+    }
+    const solicitudes = obtenerSolicitudes();
+    const piezas = obtenerPiezas();
+    const aceptadas = solicitudes.filter(function(s) { return s.estado === "Aceptada"; });
+    tbody.innerHTML = "";
+    if (aceptadas.length === 0) {
+        if (msgVacio) {
+            msgVacio.style.display = "block";
+        }
+        return;
+    }
+    if (msgVacio) {
+        msgVacio.style.display = "none";
+    }
+    aceptadas.forEach(function(s) {
+        const p = piezas.find(function(item) { return item.codigo === s.pieza; });
+        const stockDisp = p ? p.stock : 0;
+        const tr = document.createElement("tr");
+        tr.innerHTML =
+            "<td>" + s.id + "</td>" +
+            "<td>" + s.solicitante + "</td>" +
+            "<td>" + s.pieza + " — " + (s.nombrePieza || "") + "</td>" +
+            "<td>" + s.cantidad + "</td>" +
+            "<td>" + stockDisp + "</td>" +
+            "<td><span class=\"badge badge-aceptada\">Aceptada</span></td>" +
+            "<td><button class=\"btn btn-success btn-sm\" onclick=\"manejarEntregarSolicitud('" + s.id + "')\">Marcar como entregada</button></td>";
+        tbody.appendChild(tr);
+    });
+}
+
+function manejarEntregarSolicitud(id) {
+    const res = entregarSolicitud(id);
+    mostrarAlertaAlmacen(res.exito, res.mensaje);
+    renderizarAceptadasAlmacen();
+    renderizarPendientesAlmacen();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    renderizarAceptadasAlmacen();
+});
