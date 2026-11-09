@@ -377,7 +377,10 @@ function renderizarPendientesAlmacen() {
             "<td>" + s.tarea + "</td>" +
             "<td>" + s.fecha + "</td>" +
             "<td>" + s.stockActual + "</td>" +
-            "<td class=\"celda-acciones\" data-id=\"" + s.id + "\"></td>";
+            "<td>" +
+            "<button class=\"btn btn-success btn-sm\" onclick=\"manejarAceptarSolicitud('" + s.id + "')\">Aceptar</button>" +
+            "<button class=\"btn btn-danger btn-sm\" onclick=\"manejarRechazarSolicitud('" + s.id + "')\">Rechazar</button>" +
+            "</td>";
         tbody.appendChild(tr);
     });
 }
@@ -385,3 +388,48 @@ function renderizarPendientesAlmacen() {
 document.addEventListener("DOMContentLoaded", function() {
     renderizarPendientesAlmacen();
 });
+
+// === US-005-S2: Aceptar y rechazar solicitudes pendientes ===
+function aceptarSolicitud(id) {
+    const solicitudes = obtenerSolicitudes();
+    const sol = solicitudes.find(function(s) { return s.id === id; });
+    if (!sol || sol.estado !== "Pendiente") {
+        return { exito: false, mensaje: "La solicitud ya fue gestionada o no está Pendiente." };
+    }
+    sol.estado = "Aceptada";
+    guardarSolicitudes(solicitudes);
+    return { exito: true, mensaje: "Solicitud " + id + " marcada como Aceptada." };
+}
+
+function rechazarSolicitud(id) {
+    const solicitudes = obtenerSolicitudes();
+    const sol = solicitudes.find(function(s) { return s.id === id; });
+    if (!sol || sol.estado !== "Pendiente") {
+        return { exito: false, mensaje: "La solicitud ya fue gestionada o no está Pendiente." };
+    }
+    sol.estado = "Rechazada";
+    guardarSolicitudes(solicitudes);
+    return { exito: true, mensaje: "Solicitud " + id + " marcada como Rechazada." };
+}
+
+function mostrarAlertaAlmacen(exito, texto) {
+    const alerta = document.getElementById("alertaAlmacen");
+    if (!alerta) {
+        return;
+    }
+    alerta.className = exito ? "alert alert-success" : "alert alert-error";
+    alerta.textContent = texto;
+    alerta.style.display = "block";
+}
+
+function manejarAceptarSolicitud(id) {
+    const res = aceptarSolicitud(id);
+    mostrarAlertaAlmacen(res.exito, res.mensaje);
+    renderizarPendientesAlmacen();
+}
+
+function manejarRechazarSolicitud(id) {
+    const res = rechazarSolicitud(id);
+    mostrarAlertaAlmacen(res.exito, res.mensaje);
+    renderizarPendientesAlmacen();
+}

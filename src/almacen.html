@@ -52,3 +52,58 @@
     <script src="app.js"></script>
 </body>
 </html>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Centinela — Gestión de Almacén</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🛡️ Centinela</h1>
+        <nav id="navMenu">
+            <a href="index.html">Inicio</a>
+            <a href="catalogo.html">Catálogo</a>
+            <a href="solicitar.html">Solicitar Pieza</a>
+            <a href="mis-solicitudes.html">Mis Solicitudes</a>
+            <a href="almacen.html" class="active">Almacén</a>
+        </nav>
+    </header>
+    <div class="container">
+        <h2>Solicitudes Pendientes en Almacén</h2>
+        <div id="alertaAlmacen" style="display:none;"></div>
+        <table id="tablaPendientesAlmacen">
+            <thead>
+                <tr>
+                    <th>Nº</th>
+                    <th>Solicitante</th>
+                    <th>Pieza</th>
+                    <th>Cantidad</th>
+                    <th>Tarea</th>
+                    <th>Fecha</th>
+                    <th>Stock actual</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyPendientesAlmacen">
+                <tr>
+                    <td>SOL-003</td>
+                    <td>Adolfo Lozano</td>
+                    <td>P-001 — Rodamiento axial de bolas</td>
+                    <td>2</td>
+                    <td>OT-101 Ajuste eje principal</td>
+                    <td>2026-10-22</td>
+                    <td>12</td>
+                    <td><button class="btn btn-success btn-sm">Aceptar</button><button class="btn btn-danger btn-sm">Rechazar</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div id="mensajeSinPendientes" class="empty-state" style="display:none;">
+            No hay solicitudes pendientes
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
