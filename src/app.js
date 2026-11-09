@@ -318,7 +318,12 @@ function renderizarMisSolicitudes() {
             "<td>" + s.cantidad + "</td>" +
             "<td>" + s.tarea + "</td>" +
             "<td>" + s.fecha + "</td>" +
+<<<<<<< HEAD
+            "<td><span class=\"badge " + badgeClass + "\">" + s.estado + "</span>" +
+            (s.estado === "Rechazada" && s.motivoRechazo ? "<span class=\"motivo-texto\">Motivo: " + s.motivoRechazo + "</span>" : "") + "</td>" +
+=======
             "<td><span class=\"badge " + badgeClass + "\">" + s.estado + "</span></td>" +
+>>>>>>> origin/develop
             "<td>" + (s.estado === "Pendiente" ? "<button class=\"btn btn-danger btn-sm\" onclick=\"manejarCancelarSolicitud('" + s.id + "')\">Cancelar</button>" : "—") + "</td>";
         tbody.appendChild(tr);
     });
@@ -698,3 +703,82 @@ function manejarCancelarSolicitud(id) {
     }
     renderizarMisSolicitudes();
 }
+<<<<<<< HEAD
+
+// === US-010-S2: Motivo obligatorio al rechazar una solicitud ===
+let solicitudEnRechazoId = null;
+
+function rechazarSolicitudConMotivo(id, motivo) {
+    const motivoLimpio = String(motivo || "").trim();
+    if (!motivoLimpio) {
+        return { exito: false, mensaje: "El motivo del rechazo no puede estar vacío." };
+    }
+    if (motivoLimpio.length > 200) {
+        return { exito: false, mensaje: "El motivo del rechazo no puede superar los 200 caracteres." };
+    }
+    const solicitudes = obtenerSolicitudes();
+    const sol = solicitudes.find(function(s) { return s.id === id; });
+    if (!sol || sol.estado !== "Pendiente") {
+        return { exito: false, mensaje: "La solicitud no está en estado Pendiente." };
+    }
+    sol.estado = "Rechazada";
+    sol.motivoRechazo = motivoLimpio;
+    guardarSolicitudes(solicitudes);
+    return { exito: true, mensaje: "Solicitud " + id + " rechazada con motivo registrado." };
+}
+
+rechazarSolicitud = rechazarSolicitudConMotivo;
+
+manejarRechazarSolicitud = function(id) {
+    solicitudEnRechazoId = id;
+    const modal = document.getElementById("modalRechazo");
+    const input = document.getElementById("inputMotivoRechazo");
+    const err = document.getElementById("errorMotivoRechazo");
+    const lblId = document.getElementById("modalRechazoId");
+    const contador = document.getElementById("contadorMotivo");
+    if (!modal || !input) {
+        return;
+    }
+    lblId.textContent = id;
+    input.value = "";
+    contador.textContent = "0";
+    err.style.display = "none";
+    modal.style.display = "flex";
+};
+
+function inicializarModalRechazo() {
+    const modal = document.getElementById("modalRechazo");
+    const input = document.getElementById("inputMotivoRechazo");
+    const contador = document.getElementById("contadorMotivo");
+    const btnCancelar = document.getElementById("btnCancelarModalRechazo");
+    const btnConfirmar = document.getElementById("btnConfirmarModalRechazo");
+    const err = document.getElementById("errorMotivoRechazo");
+    if (!modal || !input) {
+        return;
+    }
+    input.addEventListener("input", function() {
+        contador.textContent = String(input.value.length);
+    });
+    btnCancelar.addEventListener("click", function() {
+        modal.style.display = "none";
+        solicitudEnRechazoId = null;
+    });
+    btnConfirmar.addEventListener("click", function() {
+        const res = rechazarSolicitud(solicitudEnRechazoId, input.value);
+        if (!res.exito) {
+            err.textContent = res.mensaje;
+            err.style.display = "block";
+            return;
+        }
+        modal.style.display = "none";
+        solicitudEnRechazoId = null;
+        mostrarAlertaAlmacen(true, res.mensaje);
+        renderizarPendientesAlmacen();
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    inicializarModalRechazo();
+});
+=======
+>>>>>>> origin/develop
