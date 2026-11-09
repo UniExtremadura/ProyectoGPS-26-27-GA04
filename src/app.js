@@ -387,6 +387,7 @@ function renderizarPendientesAlmacen() {
 
 document.addEventListener("DOMContentLoaded", function() {
     renderizarPendientesAlmacen();
+    if (typeof renderizarAceptadasAlmacen === 'function') { renderizarAceptadasAlmacen(); }
 });
 
 // === US-005-S2: Aceptar y rechazar solicitudes pendientes ===
@@ -426,10 +427,183 @@ function manejarAceptarSolicitud(id) {
     const res = aceptarSolicitud(id);
     mostrarAlertaAlmacen(res.exito, res.mensaje);
     renderizarPendientesAlmacen();
+    if (typeof renderizarAceptadasAlmacen === 'function') { renderizarAceptadasAlmacen(); }
 }
 
 function manejarRechazarSolicitud(id) {
     const res = rechazarSolicitud(id);
     mostrarAlertaAlmacen(res.exito, res.mensaje);
     renderizarPendientesAlmacen();
+    if (typeof renderizarAceptadasAlmacen === 'function') { renderizarAceptadasAlmacen(); }
 }
+
+// === US-006-S2: Función centralizada modificarStock y entregarSolicitud ===
+function modificarStock(codigo, deltaCantidad) {
+    const piezas = obtenerPiezas();
+    const pieza = piezas.find(function(p) { return p.codigo.toUpperCase() === String(codigo).toUpperCase(); });
+    if (!pieza) {
+        return { exito: false, mensaje: "Pieza no encontrada" };
+    }
+    const nuevoStock = pieza.stock + Number(deltaCantidad);
+    if (nuevoStock < 0) {
+        return { exito: false, mensaje: "Stock insuficiente" };
+    }
+    pieza.stock = nuevoStock;
+    guardarPiezas(piezas);
+    return { exito: true, stockResultante: nuevoStock, pieza: pieza };
+}
+
+function entregarSolicitud(id) {
+    const solicitudes = obtenerSolicitudes();
+    const sol = solicitudes.find(function(s) { return s.id === id; });
+    if (!sol || sol.estado !== "Aceptada") {
+        return { exito: false, mensaje: "Solo se pueden entregar solicitudes en estado Aceptada." };
+    }
+    const resultadoStock = modificarStock(sol.pieza, -sol.cantidad);
+    if (!resultadoStock.exito) {
+        return { exito: false, mensaje: "Stock insuficiente" };
+    }
+    sol.estado = "Entregada";
+    guardarSolicitudes(solicitudes);
+    return {
+        exito: true,
+        mensaje: "Solicitud " + id + " entregada. Nuevo stock de " + sol.pieza + ": " + resultadoStock.stockResultante + " uds."
+    };
+}
+
+function renderizarAceptadasAlmacen() {
+    const tbody = document.getElementById("tbodyAceptadasAlmacen");
+    const msgVacio = document.getElementById("mensajeSinAceptadas");
+    if (!tbody) {
+        return;
+    }
+    const solicitudes = obtenerSolicitudes();
+    const piezas = obtenerPiezas();
+    const aceptadas = solicitudes.filter(function(s) { return s.estado === "Aceptada"; });
+    tbody.innerHTML = "";
+    if (aceptadas.length === 0) {
+        if (msgVacio) {
+            msgVacio.style.display = "block";
+        }
+        return;
+    }
+    if (msgVacio) {
+        msgVacio.style.display = "none";
+    }
+    aceptadas.forEach(function(s) {
+        const p = piezas.find(function(item) { return item.codigo === s.pieza; });
+        const stockDisp = p ? p.stock : 0;
+        const tr = document.createElement("tr");
+        tr.innerHTML =
+            "<td>" + s.id + "</td>" +
+            "<td>" + s.solicitante + "</td>" +
+            "<td>" + s.pieza + " — " + (s.nombrePieza || "") + "</td>" +
+            "<td>" + s.cantidad + "</td>" +
+            "<td>" + stockDisp + "</td>" +
+            "<td><span class=\"badge badge-aceptada\">Aceptada</span></td>" +
+            "<td><button class=\"btn btn-success btn-sm\" onclick=\"manejarEntregarSolicitud('" + s.id + "')\">Marcar como entregada</button></td>";
+        tbody.appendChild(tr);
+    });
+}
+
+function manejarEntregarSolicitud(id) {
+    const res = entregarSolicitud(id);
+    mostrarAlertaAlmacen(res.exito, res.mensaje);
+    renderizarAceptadasAlmacen();
+    renderizarPendientesAlmacen();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    renderizarAceptadasAlmacen();
+});
+
+// === US-007-S2: Alta manual de nueva pieza en inventario (crearPieza) ===
+function crearPieza(datos) {
+    const piezas = obtenerPiezas();
+    const codigoLimpio = String(datos.codigo || "").trim().toUpperCase();
+    const nombreLimpio = String(datos.nombre || "").trim();
+    const categoriaLimpia = String(datos.categoria || "").trim();
+    const stockNum = Number(datos.stock);
+
+    const errores = {};
+    if (!codigoLimpio) {
+        errores.codigo = "El código de la pieza no puede estar vacío.";
+    } else if (piezas.some(function(p) { return p.codigo.toUpperCase() === codigoLimpio; })) {
+        errores.codigo = "Ya existe una pieza registrada con ese código.";
+    }
+    if (!nombreLimpio) {
+        errores.nombre = "El nombre de la pieza es obligatorio.";
+    }
+    if (!categoriaLimpia) {
+        errores.categoria = "La categoría es obligatoria.";
+    }
+    if (datos.stock === "" || !Number.isInteger(stockNum) || stockNum < 0) {
+        errores.stock = "El stock inicial debe ser un número entero mayor o igual a 0.";
+    }
+
+    if (Object.keys(errores).length > 0) {
+        return { exito: false, errores: errores };
+    }
+
+    const nuevaPieza = {
+        codigo: codigoLimpio,
+        nombre: nombreLimpio,
+        categoria: categoriaLimpia,
+        stock: stockNum
+    };
+    piezas.push(nuevaPieza);
+    guardarPiezas(piezas);
+    return { exito: true, pieza: nuevaPieza };
+}
+
+function inicializarFormularioNuevaPieza() {
+    const form = document.getElementById("formNuevaPieza");
+    if (!form) {
+        return;
+    }
+    form.addEventListener("submit", function(ev) {
+        ev.preventDefault();
+        const errCod = document.getElementById("errorNuevoCodigo");
+        const errNom = document.getElementById("errorNuevoNombre");
+        const errCat = document.getElementById("errorNuevaCategoria");
+        const errStk = document.getElementById("errorNuevoStock");
+        const alerta = document.getElementById("alertaNuevaPieza");
+
+        errCod.style.display = "none";
+        errNom.style.display = "none";
+        errCat.style.display = "none";
+        errStk.style.display = "none";
+        alerta.style.display = "none";
+
+        const res = crearPieza({
+            codigo: document.getElementById("inputNuevoCodigo").value,
+            nombre: document.getElementById("inputNuevoNombre").value,
+            categoria: document.getElementById("selectNuevaCategoria").value,
+            stock: document.getElementById("inputNuevoStock").value
+        });
+
+        if (!res.exito) {
+            if (res.errores.codigo) { errCod.textContent = res.errores.codigo; errCod.style.display = "block"; }
+            if (res.errores.nombre) { errNom.textContent = res.errores.nombre; errNom.style.display = "block"; }
+            if (res.errores.categoria) { errCat.textContent = res.errores.categoria; errCat.style.display = "block"; }
+            if (res.errores.stock) { errStk.textContent = res.errores.stock; errStk.style.display = "block"; }
+            alerta.className = "alert alert-error";
+            alerta.textContent = "No se pudo guardar la pieza. Revise los campos marcados.";
+            alerta.style.display = "block";
+            return;
+        }
+
+        alerta.className = "alert alert-success";
+        alerta.textContent = "Pieza " + res.pieza.codigo + " (" + res.pieza.nombre + ") creada correctamente.";
+        alerta.style.display = "block";
+        form.reset();
+        document.getElementById("inputNuevoStock").value = "0";
+        if (typeof renderizarInventarioAlmacen === "function") {
+            renderizarInventarioAlmacen();
+        }
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    inicializarFormularioNuevaPieza();
+});
