@@ -318,8 +318,12 @@ function renderizarMisSolicitudes() {
             "<td>" + s.cantidad + "</td>" +
             "<td>" + s.tarea + "</td>" +
             "<td>" + s.fecha + "</td>" +
+<<<<<<< HEAD
             "<td><span class=\"badge " + badgeClass + "\">" + s.estado + "</span>" +
             (s.estado === "Rechazada" && s.motivoRechazo ? "<span class=\"motivo-texto\">Motivo: " + s.motivoRechazo + "</span>" : "") + "</td>" +
+=======
+            "<td><span class=\"badge " + badgeClass + "\">" + s.estado + "</span></td>" +
+>>>>>>> origin/develop
             "<td>" + (s.estado === "Pendiente" ? "<button class=\"btn btn-danger btn-sm\" onclick=\"manejarCancelarSolicitud('" + s.id + "')\">Cancelar</button>" : "—") + "</td>";
         tbody.appendChild(tr);
     });
@@ -699,6 +703,7 @@ function manejarCancelarSolicitud(id) {
     }
     renderizarMisSolicitudes();
 }
+<<<<<<< HEAD
 
 // === US-010-S2: Motivo obligatorio al rechazar una solicitud ===
 let solicitudEnRechazoId = null;
@@ -775,3 +780,5 @@ function inicializarModalRechazo() {
 document.addEventListener("DOMContentLoaded", function() {
     inicializarModalRechazo();
 });
+=======
+>>>>>>> origin/develop
