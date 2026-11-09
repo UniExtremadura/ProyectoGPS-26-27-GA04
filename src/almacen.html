@@ -101,6 +101,31 @@
             </div>
             <button type="submit" class="btn btn-success" id="btnGuardarPieza">Guardar</button>
         </form>
+
+        <h2 style="margin-top:32px;">Ajuste Manual de Stock en Inventario</h2>
+        <div id="alertaInventario" style="display:none;"></div>
+        <table id="tablaInventarioAlmacen">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Stock actual</th>
+                    <th>Nuevo stock</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyInventarioAlmacen">
+                <tr>
+                    <td>P-001</td>
+                    <td>Rodamiento axial de bolas</td>
+                    <td>Mecánica</td>
+                    <td>12</td>
+                    <td><input type="number" min="0" value="12" style="width:100px;"></td>
+                    <td><button class="btn btn-sm">Ajustar</button></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
     <script src="app.js"></script>
 </body>

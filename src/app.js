@@ -607,3 +607,64 @@ function inicializarFormularioNuevaPieza() {
 document.addEventListener("DOMContentLoaded", function() {
     inicializarFormularioNuevaPieza();
 });
+
+// === US-008-S2: Ajuste manual de stock (ajustarStock) ===
+function ajustarStock(codigo, nuevaCantidad) {
+    const piezas = obtenerPiezas();
+    const pieza = piezas.find(function(p) { return p.codigo.toUpperCase() === String(codigo).toUpperCase(); });
+    if (!pieza) {
+        return { exito: false, mensaje: "La pieza indicada no existe." };
+    }
+    const cantNum = Number(nuevaCantidad);
+    if (nuevaCantidad === "" || !Number.isInteger(cantNum) || cantNum < 0) {
+        return { exito: false, mensaje: "El nuevo stock debe ser un número entero mayor o igual a 0." };
+    }
+    const diferencia = cantNum - pieza.stock;
+    const res = modificarStock(codigo, diferencia);
+    if (!res.exito) {
+        return res;
+    }
+    return {
+        exito: true,
+        mensaje: "Stock de " + pieza.codigo + " actualizado a " + cantNum + " unidades."
+    };
+}
+
+function renderizarInventarioAlmacen() {
+    const tbody = document.getElementById("tbodyInventarioAlmacen");
+    if (!tbody) {
+        return;
+    }
+    const piezas = obtenerPiezas();
+    tbody.innerHTML = "";
+    piezas.forEach(function(p) {
+        const tr = document.createElement("tr");
+        tr.innerHTML =
+            "<td>" + p.codigo + "</td>" +
+            "<td>" + p.nombre + "</td>" +
+            "<td>" + p.categoria + "</td>" +
+            "<td>" + p.stock + "</td>" +
+            "<td><input type=\"number\" id=\"inputStock_" + p.codigo + "\" min=\"0\" step=\"1\" value=\"" + p.stock + "\" style=\"width:100px;\"></td>" +
+            "<td><button class=\"btn btn-sm\" onclick=\"manejarAjusteStock('" + p.codigo + "')\">Ajustar</button></td>";
+        tbody.appendChild(tr);
+    });
+}
+
+function manejarAjusteStock(codigo) {
+    const input = document.getElementById("inputStock_" + codigo);
+    const alerta = document.getElementById("alertaInventario");
+    if (!input || !alerta) {
+        return;
+    }
+    const res = ajustarStock(codigo, input.value);
+    alerta.className = res.exito ? "alert alert-success" : "alert alert-error";
+    alerta.textContent = res.mensaje;
+    alerta.style.display = "block";
+    renderizarInventarioAlmacen();
+    renderizarPendientesAlmacen();
+    renderizarAceptadasAlmacen();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    renderizarInventarioAlmacen();
+});
