@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Centinela — Gestión de Almacén</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🛡️ Centinela</h1>
+        <nav id="navMenu">
+            <a href="index.html">Inicio</a>
+            <a href="catalogo.html">Catálogo</a>
+            <a href="solicitar.html">Solicitar Pieza</a>
+            <a href="mis-solicitudes.html">Mis Solicitudes</a>
+            <a href="almacen.html" class="active">Almacén</a>
+        </nav>
+    </header>
+    <div class="container">
+        <h2>Solicitudes Pendientes en Almacén</h2>
+        <div id="alertaAlmacen" style="display:none;"></div>
+        <table id="tablaPendientesAlmacen">
+            <thead>
+                <tr>
+                    <th>Nº</th>
+                    <th>Solicitante</th>
+                    <th>Pieza</th>
+                    <th>Cantidad</th>
+                    <th>Tarea</th>
+                    <th>Fecha</th>
+                    <th>Stock actual</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyPendientesAlmacen"></tbody>
+        </table>
+        <div id="mensajeSinPendientes" class="empty-state" style="display:none;">
+            No hay solicitudes pendientes
+        </div>
+
+        <h2 style="margin-top:32px;">Solicitudes Aceptadas (Pendientes de Entrega)</h2>
+        <table id="tablaAceptadasAlmacen">
+            <thead>
+                <tr>
+                    <th>Nº</th>
+                    <th>Solicitante</th>
+                    <th>Pieza</th>
+                    <th>Cantidad</th>
+                    <th>Stock disponible</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyAceptadasAlmacen">
+                <tr>
+                    <td>SOL-002</td>
+                    <td>Adolfo Lozano</td>
+                    <td>P-003 — Sensor inductivo de proximidad</td>
+                    <td>1</td>
+                    <td>8</td>
+                    <td><span class="badge badge-aceptada">Aceptada</span></td>
+                    <td><button class="btn btn-success btn-sm">Marcar como entregada</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div id="mensajeSinAceptadas" class="empty-state" style="display:none;">
+            No hay solicitudes aceptadas pendientes de entrega
+        </div>
+
+        <h2 style="margin-top:32px;">Nueva Pieza en Inventario</h2>
+        <div id="alertaNuevaPieza" style="display:none;"></div>
+        <form id="formNuevaPieza" novalidate>
+            <div class="form-group">
+                <label for="inputNuevoCodigo">Código de la pieza:</label>
+                <input type="text" id="inputNuevoCodigo" placeholder="Ej. P-016">
+                <div id="errorNuevoCodigo" class="field-error">El código es obligatorio y no puede estar repetido.</div>
+            </div>
+            <div class="form-group">
+                <label for="inputNuevoNombre">Nombre de la pieza:</label>
+                <input type="text" id="inputNuevoNombre" placeholder="Ej. Válvula antirretorno inox">
+                <div id="errorNuevoNombre" class="field-error">El nombre de la pieza es obligatorio.</div>
+            </div>
+            <div class="form-group">
+                <label for="selectNuevaCategoria">Categoría:</label>
+                <select id="selectNuevaCategoria">
+                    <option value="">-- Seleccione categoría --</option>
+                    <option value="Mecánica">Mecánica</option>
+                    <option value="Hidráulica">Hidráulica</option>
+                    <option value="Neumática">Neumática</option>
+                    <option value="Electrónica">Electrónica</option>
+                    <option value="Eléctrica">Eléctrica</option>
+                    <option value="Instrumentación">Instrumentación</option>
+                    <option value="Consumibles">Consumibles</option>
+                </select>
+                <div id="errorNuevaCategoria" class="field-error">Debe seleccionar una categoría.</div>
+            </div>
+            <div class="form-group">
+                <label for="inputNuevoStock">Stock inicial:</label>
+                <input type="number" id="inputNuevoStock" min="0" step="1" value="0">
+                <div id="errorNuevoStock" class="field-error">El stock inicial debe ser un número entero mayor o igual a 0.</div>
+            </div>
+            <button type="submit" class="btn btn-success" id="btnGuardarPieza">Guardar</button>
+        </form>
+
+        <h2 style="margin-top:32px;">Ajuste Manual de Stock en Inventario</h2>
+        <div id="alertaInventario" style="display:none;"></div>
+        <table id="tablaInventarioAlmacen">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Stock actual</th>
+                    <th>Nuevo stock</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyInventarioAlmacen">
+                <tr>
+                    <td>P-001</td>
+                    <td>Rodamiento axial de bolas</td>
+                    <td>Mecánica</td>
+                    <td>12</td>
+                    <td><input type="number" min="0" value="12" style="width:100px;"></td>
+                    <td><button class="btn btn-sm">Ajustar</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
