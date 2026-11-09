@@ -516,3 +516,94 @@ function manejarEntregarSolicitud(id) {
 document.addEventListener("DOMContentLoaded", function() {
     renderizarAceptadasAlmacen();
 });
+
+// === US-007-S2: Alta manual de nueva pieza en inventario (crearPieza) ===
+function crearPieza(datos) {
+    const piezas = obtenerPiezas();
+    const codigoLimpio = String(datos.codigo || "").trim().toUpperCase();
+    const nombreLimpio = String(datos.nombre || "").trim();
+    const categoriaLimpia = String(datos.categoria || "").trim();
+    const stockNum = Number(datos.stock);
+
+    const errores = {};
+    if (!codigoLimpio) {
+        errores.codigo = "El código de la pieza no puede estar vacío.";
+    } else if (piezas.some(function(p) { return p.codigo.toUpperCase() === codigoLimpio; })) {
+        errores.codigo = "Ya existe una pieza registrada con ese código.";
+    }
+    if (!nombreLimpio) {
+        errores.nombre = "El nombre de la pieza es obligatorio.";
+    }
+    if (!categoriaLimpia) {
+        errores.categoria = "La categoría es obligatoria.";
+    }
+    if (datos.stock === "" || !Number.isInteger(stockNum) || stockNum < 0) {
+        errores.stock = "El stock inicial debe ser un número entero mayor o igual a 0.";
+    }
+
+    if (Object.keys(errores).length > 0) {
+        return { exito: false, errores: errores };
+    }
+
+    const nuevaPieza = {
+        codigo: codigoLimpio,
+        nombre: nombreLimpio,
+        categoria: categoriaLimpia,
+        stock: stockNum
+    };
+    piezas.push(nuevaPieza);
+    guardarPiezas(piezas);
+    return { exito: true, pieza: nuevaPieza };
+}
+
+function inicializarFormularioNuevaPieza() {
+    const form = document.getElementById("formNuevaPieza");
+    if (!form) {
+        return;
+    }
+    form.addEventListener("submit", function(ev) {
+        ev.preventDefault();
+        const errCod = document.getElementById("errorNuevoCodigo");
+        const errNom = document.getElementById("errorNuevoNombre");
+        const errCat = document.getElementById("errorNuevaCategoria");
+        const errStk = document.getElementById("errorNuevoStock");
+        const alerta = document.getElementById("alertaNuevaPieza");
+
+        errCod.style.display = "none";
+        errNom.style.display = "none";
+        errCat.style.display = "none";
+        errStk.style.display = "none";
+        alerta.style.display = "none";
+
+        const res = crearPieza({
+            codigo: document.getElementById("inputNuevoCodigo").value,
+            nombre: document.getElementById("inputNuevoNombre").value,
+            categoria: document.getElementById("selectNuevaCategoria").value,
+            stock: document.getElementById("inputNuevoStock").value
+        });
+
+        if (!res.exito) {
+            if (res.errores.codigo) { errCod.textContent = res.errores.codigo; errCod.style.display = "block"; }
+            if (res.errores.nombre) { errNom.textContent = res.errores.nombre; errNom.style.display = "block"; }
+            if (res.errores.categoria) { errCat.textContent = res.errores.categoria; errCat.style.display = "block"; }
+            if (res.errores.stock) { errStk.textContent = res.errores.stock; errStk.style.display = "block"; }
+            alerta.className = "alert alert-error";
+            alerta.textContent = "No se pudo guardar la pieza. Revise los campos marcados.";
+            alerta.style.display = "block";
+            return;
+        }
+
+        alerta.className = "alert alert-success";
+        alerta.textContent = "Pieza " + res.pieza.codigo + " (" + res.pieza.nombre + ") creada correctamente.";
+        alerta.style.display = "block";
+        form.reset();
+        document.getElementById("inputNuevoStock").value = "0";
+        if (typeof renderizarInventarioAlmacen === "function") {
+            renderizarInventarioAlmacen();
+        }
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    inicializarFormularioNuevaPieza();
+});

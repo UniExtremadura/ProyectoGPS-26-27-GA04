@@ -66,6 +66,41 @@
         <div id="mensajeSinAceptadas" class="empty-state" style="display:none;">
             No hay solicitudes aceptadas pendientes de entrega
         </div>
+
+        <h2 style="margin-top:32px;">Nueva Pieza en Inventario</h2>
+        <div id="alertaNuevaPieza" style="display:none;"></div>
+        <form id="formNuevaPieza" novalidate>
+            <div class="form-group">
+                <label for="inputNuevoCodigo">Código de la pieza:</label>
+                <input type="text" id="inputNuevoCodigo" placeholder="Ej. P-016">
+                <div id="errorNuevoCodigo" class="field-error">El código es obligatorio y no puede estar repetido.</div>
+            </div>
+            <div class="form-group">
+                <label for="inputNuevoNombre">Nombre de la pieza:</label>
+                <input type="text" id="inputNuevoNombre" placeholder="Ej. Válvula antirretorno inox">
+                <div id="errorNuevoNombre" class="field-error">El nombre de la pieza es obligatorio.</div>
+            </div>
+            <div class="form-group">
+                <label for="selectNuevaCategoria">Categoría:</label>
+                <select id="selectNuevaCategoria">
+                    <option value="">-- Seleccione categoría --</option>
+                    <option value="Mecánica">Mecánica</option>
+                    <option value="Hidráulica">Hidráulica</option>
+                    <option value="Neumática">Neumática</option>
+                    <option value="Electrónica">Electrónica</option>
+                    <option value="Eléctrica">Eléctrica</option>
+                    <option value="Instrumentación">Instrumentación</option>
+                    <option value="Consumibles">Consumibles</option>
+                </select>
+                <div id="errorNuevaCategoria" class="field-error">Debe seleccionar una categoría.</div>
+            </div>
+            <div class="form-group">
+                <label for="inputNuevoStock">Stock inicial:</label>
+                <input type="number" id="inputNuevoStock" min="0" step="1" value="0">
+                <div id="errorNuevoStock" class="field-error">El stock inicial debe ser un número entero mayor o igual a 0.</div>
+            </div>
+            <button type="submit" class="btn btn-success" id="btnGuardarPieza">Guardar</button>
+        </form>
     </div>
     <script src="app.js"></script>
 </body>
