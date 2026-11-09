@@ -318,7 +318,8 @@ function renderizarMisSolicitudes() {
             "<td>" + s.cantidad + "</td>" +
             "<td>" + s.tarea + "</td>" +
             "<td>" + s.fecha + "</td>" +
-            "<td><span class=\"badge " + badgeClass + "\">" + s.estado + "</span></td>";
+            "<td><span class=\"badge " + badgeClass + "\">" + s.estado + "</span></td>" +
+            "<td>" + (s.estado === "Pendiente" ? "<button class=\"btn btn-danger btn-sm\" onclick=\"manejarCancelarSolicitud('" + s.id + "')\">Cancelar</button>" : "—") + "</td>";
         tbody.appendChild(tr);
     });
 }
@@ -668,3 +669,32 @@ function manejarAjusteStock(codigo) {
 document.addEventListener("DOMContentLoaded", function() {
     renderizarInventarioAlmacen();
 });
+
+// === US-009-S2: Cancelar una solicitud propia pendiente (cancelarSolicitud) ===
+function cancelarSolicitud(id, usuario) {
+    const solicitudes = obtenerSolicitudes();
+    const sol = solicitudes.find(function(s) { return s.id === id; });
+    if (!sol) {
+        return { exito: false, mensaje: "La solicitud no existe." };
+    }
+    if (sol.solicitante !== usuario) {
+        return { exito: false, mensaje: "Solo puedes cancelar tus propias solicitudes." };
+    }
+    if (sol.estado !== "Pendiente") {
+        return { exito: false, mensaje: "Solo se pueden cancelar solicitudes en estado Pendiente." };
+    }
+    sol.estado = "Cancelada";
+    guardarSolicitudes(solicitudes);
+    return { exito: true, mensaje: "Solicitud " + id + " cancelada correctamente." };
+}
+
+function manejarCancelarSolicitud(id) {
+    const res = cancelarSolicitud(id, USUARIO_ACTUAL);
+    const alerta = document.getElementById("alertaMisSolicitudes");
+    if (alerta) {
+        alerta.className = res.exito ? "alert alert-success" : "alert alert-error";
+        alerta.textContent = res.mensaje;
+        alerta.style.display = "block";
+    }
+    renderizarMisSolicitudes();
+}
