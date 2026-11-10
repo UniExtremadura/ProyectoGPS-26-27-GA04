@@ -323,7 +323,10 @@ function renderizarMisSolicitudes() {
             "<td>" + s.fecha + "</td>" +
             "<td><span class=\"badge " + badgeClass + "\">" + s.estado + "</span>" +
             (s.estado === "Rechazada" && s.motivoRechazo ? "<span class=\"motivo-texto\">Motivo: " + s.motivoRechazo + "</span>" : "") + "</td>" +
-            "<td>" + (s.estado === "Pendiente" ? "<button class=\"btn btn-danger btn-sm\" onclick=\"manejarCancelarSolicitud('" + s.id + "')\">Cancelar</button>" : "—") + "</td>";
+            "<td>" +
+            (s.estado === "Pendiente" ? "<button class=\"btn btn-danger btn-sm\" onclick=\"manejarCancelarSolicitud('" + s.id + "')\">Cancelar</button> " : "") +
+            "<button class=\"btn btn-sm\" onclick=\"duplicarSolicitud('" + s.id + "')\">Duplicar</button>" +
+            "</td>";
         tbody.appendChild(tr);
     });
 }
@@ -997,4 +1000,54 @@ function inicializarVistaHistorico() {
 document.addEventListener("DOMContentLoaded", function() {
     inicializarMovimientosMock();
     inicializarVistaHistorico();
+});
+
+// === US-014-S2: Duplicar una solicitud anterior (duplicarSolicitud) ===
+function duplicarSolicitud(id) {
+    const solicitudes = obtenerSolicitudes();
+    const original = solicitudes.find(function(s) { return s.id === id; });
+    if (!original) {
+        return;
+    }
+    const url = "solicitar.html?duplicar=" + encodeURIComponent(original.id);
+    window.location.href = url;
+}
+
+function precargarDesdeDuplicado() {
+    const form = document.getElementById("formSolicitud");
+    if (!form) {
+        return;
+    }
+    const params = new URLSearchParams(window.location.search);
+    const idDup = params.get("duplicar");
+    if (!idDup) {
+        return;
+    }
+    const solicitudes = obtenerSolicitudes();
+    const original = solicitudes.find(function(s) { return s.id === idDup; });
+    const alerta = document.getElementById("alertaFormulario");
+    if (!original) {
+        return;
+    }
+    const existePieza = obtenerPiezas().some(function(p) { return p.codigo === original.pieza; });
+    if (!existePieza) {
+        if (alerta) {
+            alerta.className = "alert alert-error";
+            alerta.textContent = "La pieza de la solicitud original ya no existe en el catálogo.";
+            alerta.style.display = "block";
+        }
+        return;
+    }
+    document.getElementById("selectPieza").value = original.pieza;
+    document.getElementById("inputCantidad").value = String(original.cantidad);
+    document.getElementById("inputTarea").value = original.tarea;
+    if (alerta) {
+        alerta.className = "alert alert-success";
+        alerta.textContent = "Datos precargados desde la solicitud " + original.id + ". Pulse Solicitar para confirmar.";
+        alerta.style.display = "block";
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    precargarDesdeDuplicado();
 });
