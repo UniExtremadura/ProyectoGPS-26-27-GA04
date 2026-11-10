@@ -829,3 +829,53 @@ function inicializarFiltroCategorias() {
 document.addEventListener("DOMContentLoaded", function() {
     inicializarFiltroCategorias();
 });
+
+// === US-012-S2: Ordenar catálogo por cantidad de stock (ordenarPorStock) ===
+let direccionOrdenStock = null; // 'asc' | 'desc' | null
+
+function ordenarPorStock(lista, direccion) {
+    const copia = (lista || []).slice();
+    if (!direccion) {
+        return copia;
+    }
+    return copia.sort(function(a, b) {
+        if (a.stock !== b.stock) {
+            return direccion === "asc" ? a.stock - b.stock : b.stock - a.stock;
+        }
+        return a.nombre.localeCompare(b.nombre);
+    });
+}
+
+function inicializarOrdenStock() {
+    const thStock = document.getElementById("thOrdenStock");
+    const icono = document.getElementById("iconoOrdenStock");
+    const inputBusqueda = document.getElementById("inputBusqueda");
+    const selectCat = document.getElementById("selectFiltroCategoria");
+    if (!thStock) {
+        return;
+    }
+    const refrescarCatalogoCompleto = function() {
+        const cat = selectCat ? selectCat.value : "Todas";
+        const txt = inputBusqueda ? inputBusqueda.value : "";
+        let resultado = filtrarPiezas(txt, cat);
+        if (direccionOrdenStock) {
+            resultado = ordenarPorStock(resultado, direccionOrdenStock);
+        }
+        renderizarTablaCatalogo(resultado);
+    };
+
+    thStock.addEventListener("click", function() {
+        if (direccionOrdenStock === "asc") {
+            direccionOrdenStock = "desc";
+            if (icono) { icono.textContent = "▼"; }
+        } else {
+            direccionOrdenStock = "asc";
+            if (icono) { icono.textContent = "▲"; }
+        }
+        refrescarCatalogoCompleto();
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    inicializarOrdenStock();
+});
