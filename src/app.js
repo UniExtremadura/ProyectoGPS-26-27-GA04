@@ -82,7 +82,10 @@ function renderizarTablaCatalogo(lista) {
             "<td>" + p.categoria + "</td>" +
             "<td>" + p.stock + "</td>" +
             "<td><span class=\"badge " + badgeClass + "\">" + badgeText + "</span></td>" +
-            "<td><a class=\"btn btn-sm\" href=\"solicitar.html?pieza=" + encodeURIComponent(p.codigo) + "\">Solicitar</a></td>";
+            "<td>" +
+            "<a class=\"btn btn-sm\" href=\"solicitar.html?pieza=" + encodeURIComponent(p.codigo) + "\">Solicitar</a> " +
+            "<a class=\"btn btn-secondary btn-sm\" href=\"historico.html?codigo=" + encodeURIComponent(p.codigo) + "\">Histórico</a>" +
+            "</td>";
         tbody.appendChild(tr);
     });
 }
@@ -318,12 +321,8 @@ function renderizarMisSolicitudes() {
             "<td>" + s.cantidad + "</td>" +
             "<td>" + s.tarea + "</td>" +
             "<td>" + s.fecha + "</td>" +
-<<<<<<< HEAD
             "<td><span class=\"badge " + badgeClass + "\">" + s.estado + "</span>" +
             (s.estado === "Rechazada" && s.motivoRechazo ? "<span class=\"motivo-texto\">Motivo: " + s.motivoRechazo + "</span>" : "") + "</td>" +
-=======
-            "<td><span class=\"badge " + badgeClass + "\">" + s.estado + "</span></td>" +
->>>>>>> origin/develop
             "<td>" + (s.estado === "Pendiente" ? "<button class=\"btn btn-danger btn-sm\" onclick=\"manejarCancelarSolicitud('" + s.id + "')\">Cancelar</button>" : "—") + "</td>";
         tbody.appendChild(tr);
     });
@@ -703,7 +702,6 @@ function manejarCancelarSolicitud(id) {
     }
     renderizarMisSolicitudes();
 }
-<<<<<<< HEAD
 
 // === US-010-S2: Motivo obligatorio al rechazar una solicitud ===
 let solicitudEnRechazoId = null;
@@ -780,5 +778,223 @@ function inicializarModalRechazo() {
 document.addEventListener("DOMContentLoaded", function() {
     inicializarModalRechazo();
 });
-=======
->>>>>>> origin/develop
+
+// === US-011-S2: Filtrar catálogo por categoría (obtenerCategorias y filtrarPiezas) ===
+function obtenerCategorias() {
+    const piezas = obtenerPiezas();
+    const categorias = [];
+    piezas.forEach(function(p) {
+        if (p.categoria && !categorias.includes(p.categoria)) {
+            categorias.push(p.categoria);
+        }
+    });
+    return categorias.sort();
+}
+
+function filtrarPiezas(texto, categoria) {
+    const porTexto = buscarPiezas(texto);
+    if (!categoria || categoria === "Todas") {
+        return porTexto;
+    }
+    return porTexto.filter(function(p) {
+        return p.categoria === categoria;
+    });
+}
+
+function inicializarFiltroCategorias() {
+    const selectCat = document.getElementById("selectFiltroCategoria");
+    const inputBusqueda = document.getElementById("inputBusqueda");
+    const btnBuscar = document.getElementById("btnBuscar");
+    if (!selectCat || !inputBusqueda) {
+        return;
+    }
+    const categorias = obtenerCategorias();
+    selectCat.innerHTML = '<option value="Todas">Todas</option>';
+    categorias.forEach(function(cat) {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = cat;
+        selectCat.appendChild(opt);
+    });
+
+    const actualizar = function() {
+        const filtradas = filtrarPiezas(inputBusqueda.value, selectCat.value);
+        renderizarTablaCatalogo(filtradas);
+    };
+    selectCat.addEventListener("change", actualizar);
+    inputBusqueda.addEventListener("input", actualizar);
+    if (btnBuscar) {
+        btnBuscar.addEventListener("click", actualizar);
+    }
+    actualizar();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    inicializarFiltroCategorias();
+});
+
+// === US-012-S2: Ordenar catálogo por cantidad de stock (ordenarPorStock) ===
+let direccionOrdenStock = null; // 'asc' | 'desc' | null
+
+function ordenarPorStock(lista, direccion) {
+    const copia = (lista || []).slice();
+    if (!direccion) {
+        return copia;
+    }
+    return copia.sort(function(a, b) {
+        if (a.stock !== b.stock) {
+            return direccion === "asc" ? a.stock - b.stock : b.stock - a.stock;
+        }
+        return a.nombre.localeCompare(b.nombre);
+    });
+}
+
+function inicializarOrdenStock() {
+    const thStock = document.getElementById("thOrdenStock");
+    const icono = document.getElementById("iconoOrdenStock");
+    const inputBusqueda = document.getElementById("inputBusqueda");
+    const selectCat = document.getElementById("selectFiltroCategoria");
+    if (!thStock) {
+        return;
+    }
+    const refrescarCatalogoCompleto = function() {
+        const cat = selectCat ? selectCat.value : "Todas";
+        const txt = inputBusqueda ? inputBusqueda.value : "";
+        let resultado = filtrarPiezas(txt, cat);
+        if (direccionOrdenStock) {
+            resultado = ordenarPorStock(resultado, direccionOrdenStock);
+        }
+        renderizarTablaCatalogo(resultado);
+    };
+
+    thStock.addEventListener("click", function() {
+        if (direccionOrdenStock === "asc") {
+            direccionOrdenStock = "desc";
+            if (icono) { icono.textContent = "▼"; }
+        } else {
+            direccionOrdenStock = "asc";
+            if (icono) { icono.textContent = "▲"; }
+        }
+        refrescarCatalogoCompleto();
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    inicializarOrdenStock();
+});
+
+// === US-013-S2: Registro y consulta de histórico de movimientos ===
+const MOVIMIENTOS_MOCK_INICIALES = [
+    {
+        codigo: "P-001",
+        fecha: "2026-10-15 09:00",
+        tipo: "Entrada",
+        cantidad: 14,
+        stockResultante: 14,
+        origen: "Carga inicial de inventario"
+    },
+    {
+        codigo: "P-001",
+        fecha: "2026-10-20 11:15",
+        tipo: "Salida",
+        cantidad: -2,
+        stockResultante: 12,
+        origen: "SOL-001"
+    },
+    {
+        codigo: "P-009",
+        fecha: "2026-10-18 16:40",
+        tipo: "Salida",
+        cantidad: -4,
+        stockResultante: 40,
+        origen: "SOL-001"
+    }
+];
+
+function inicializarMovimientosMock() {
+    if (!localStorage.getItem("centinela_movimientos")) {
+        localStorage.setItem("centinela_movimientos", JSON.stringify(MOVIMIENTOS_MOCK_INICIALES));
+    }
+}
+
+function obtenerMovimientos() {
+    inicializarMovimientosMock();
+    return JSON.parse(localStorage.getItem("centinela_movimientos")) || [];
+}
+
+function registrarMovimiento(datosMov) {
+    const movimientos = obtenerMovimientos();
+    movimientos.push({
+        codigo: datosMov.codigo,
+        fecha: datosMov.fecha || new Date().toISOString().replace("T", " ").substring(0, 16),
+        tipo: datosMov.tipo,
+        cantidad: datosMov.cantidad,
+        stockResultante: datosMov.stockResultante,
+        origen: datosMov.origen || "Ajuste manual"
+    });
+    localStorage.setItem("centinela_movimientos", JSON.stringify(movimientos));
+}
+
+function obtenerHistorico(codigo) {
+    const movimientos = obtenerMovimientos();
+    return movimientos
+        .filter(function(m) { return m.codigo.toUpperCase() === String(codigo || "").toUpperCase(); })
+        .slice()
+        .reverse();
+}
+
+const modificarStockBase = modificarStock;
+modificarStock = function(codigo, deltaCantidad, tipoOpcional, origenOpcional) {
+    const res = modificarStockBase(codigo, deltaCantidad);
+    if (res.exito && Number(deltaCantidad) !== 0) {
+        const tipoMov = tipoOpcional || (deltaCantidad < 0 ? "Salida" : "Ajuste");
+        registrarMovimiento({
+            codigo: res.pieza.codigo,
+            tipo: tipoMov,
+            cantidad: Number(deltaCantidad),
+            stockResultante: res.stockResultante,
+            origen: origenOpcional || (deltaCantidad < 0 ? "Entrega almacén" : "Ajuste manual")
+        });
+    }
+    return res;
+};
+
+function inicializarVistaHistorico() {
+    const tbody = document.getElementById("tbodyHistorico");
+    const msgVacio = document.getElementById("mensajeSinMovimientos");
+    const titulo = document.getElementById("tituloPiezaHistorico");
+    if (!tbody) {
+        return;
+    }
+    const params = new URLSearchParams(window.location.search);
+    const codigo = params.get("codigo") || "P-001";
+    const pieza = obtenerPiezas().find(function(p) { return p.codigo.toUpperCase() === codigo.toUpperCase(); });
+    if (titulo) {
+        titulo.textContent = pieza
+            ? pieza.codigo + " — " + pieza.nombre + " (Stock actual: " + pieza.stock + ")"
+            : codigo;
+    }
+    const lista = obtenerHistorico(codigo);
+    tbody.innerHTML = "";
+    if (lista.length === 0) {
+        if (msgVacio) { msgVacio.style.display = "block"; }
+        return;
+    }
+    if (msgVacio) { msgVacio.style.display = "none"; }
+    lista.forEach(function(m) {
+        const signo = m.cantidad > 0 ? "+" + m.cantidad : String(m.cantidad);
+        const tr = document.createElement("tr");
+        tr.innerHTML =
+            "<td>" + m.fecha + "</td>" +
+            "<td>" + m.tipo + "</td>" +
+            "<td>" + signo + "</td>" +
+            "<td>" + m.stockResultante + "</td>" +
+            "<td>" + m.origen + "</td>";
+        tbody.appendChild(tr);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    inicializarMovimientosMock();
+    inicializarVistaHistorico();
+});

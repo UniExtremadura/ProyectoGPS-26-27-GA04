@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Centinela — Histórico de Movimientos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🛡️ Centinela</h1>
+        <nav id="navMenu">
+            <a href="index.html">Inicio</a>
+            <a href="catalogo.html">Catálogo</a>
+            <a href="solicitar.html">Solicitar Pieza</a>
+            <a href="mis-solicitudes.html">Mis Solicitudes</a>
+            <a href="almacen.html">Almacén</a>
+        </nav>
+    </header>
+    <div class="container">
+        <h2>Histórico de la Pieza: <span id="tituloPiezaHistorico">P-001 — Rodamiento axial de bolas (Stock actual: 12)</span></h2>
+        <p><a href="catalogo.html" class="btn btn-secondary btn-sm">← Volver al Catálogo</a></p>
+        <table id="tablaHistorico">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Cantidad</th>
+                    <th>Stock resultante</th>
+                    <th>Origen</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyHistorico">
+                <tr>
+                    <td>2026-10-21 10:30</td>
+                    <td>Salida</td>
+                    <td>-2</td>
+                    <td>12</td>
+                    <td>SOL-001</td>
+                </tr>
+                <tr>
+                    <td>2026-10-15 09:00</td>
+                    <td>Entrada</td>
+                    <td>+14</td>
+                    <td>14</td>
+                    <td>Alta inicial</td>
+                </tr>
+            </tbody>
+        </table>
+        <div id="mensajeSinMovimientos" class="empty-state" style="display:none;">
+            Sin movimientos
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

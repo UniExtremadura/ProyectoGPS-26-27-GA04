@@ -20,6 +20,11 @@
         <h2>Catálogo de Piezas</h2>
         <div class="toolbar">
             <input type="text" id="inputBusqueda" placeholder="Buscar por nombre o código..." style="flex:1; max-width:360px;">
+            <select id="selectFiltroCategoria" style="max-width:220px;">
+                <option value="Todas">Todas las categorías</option>
+                <option value="Mecánica">Mecánica</option>
+                <option value="Hidráulica">Hidráulica</option>
+            </select>
             <button class="btn" id="btnBuscar" type="button">Buscar</button>
         </div>
         <table id="tablaCatalogo">
@@ -28,7 +33,7 @@
                     <th>Código</th>
                     <th>Nombre</th>
                     <th>Categoría</th>
-                    <th>Stock</th>
+                    <th id="thOrdenStock" class="sortable">Stock <span id="iconoOrdenStock">▲▼</span></th>
                     <th>Disponibilidad</th>
                     <th>Acciones</th>
                 </tr>
