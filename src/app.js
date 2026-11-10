@@ -318,12 +318,8 @@ function renderizarMisSolicitudes() {
             "<td>" + s.cantidad + "</td>" +
             "<td>" + s.tarea + "</td>" +
             "<td>" + s.fecha + "</td>" +
-<<<<<<< HEAD
             "<td><span class=\"badge " + badgeClass + "\">" + s.estado + "</span>" +
             (s.estado === "Rechazada" && s.motivoRechazo ? "<span class=\"motivo-texto\">Motivo: " + s.motivoRechazo + "</span>" : "") + "</td>" +
-=======
-            "<td><span class=\"badge " + badgeClass + "\">" + s.estado + "</span></td>" +
->>>>>>> origin/develop
             "<td>" + (s.estado === "Pendiente" ? "<button class=\"btn btn-danger btn-sm\" onclick=\"manejarCancelarSolicitud('" + s.id + "')\">Cancelar</button>" : "—") + "</td>";
         tbody.appendChild(tr);
     });
@@ -703,7 +699,6 @@ function manejarCancelarSolicitud(id) {
     }
     renderizarMisSolicitudes();
 }
-<<<<<<< HEAD
 
 // === US-010-S2: Motivo obligatorio al rechazar una solicitud ===
 let solicitudEnRechazoId = null;
@@ -780,5 +775,57 @@ function inicializarModalRechazo() {
 document.addEventListener("DOMContentLoaded", function() {
     inicializarModalRechazo();
 });
-=======
->>>>>>> origin/develop
+
+// === US-011-S2: Filtrar catálogo por categoría (obtenerCategorias y filtrarPiezas) ===
+function obtenerCategorias() {
+    const piezas = obtenerPiezas();
+    const categorias = [];
+    piezas.forEach(function(p) {
+        if (p.categoria && !categorias.includes(p.categoria)) {
+            categorias.push(p.categoria);
+        }
+    });
+    return categorias.sort();
+}
+
+function filtrarPiezas(texto, categoria) {
+    const porTexto = buscarPiezas(texto);
+    if (!categoria || categoria === "Todas") {
+        return porTexto;
+    }
+    return porTexto.filter(function(p) {
+        return p.categoria === categoria;
+    });
+}
+
+function inicializarFiltroCategorias() {
+    const selectCat = document.getElementById("selectFiltroCategoria");
+    const inputBusqueda = document.getElementById("inputBusqueda");
+    const btnBuscar = document.getElementById("btnBuscar");
+    if (!selectCat || !inputBusqueda) {
+        return;
+    }
+    const categorias = obtenerCategorias();
+    selectCat.innerHTML = '<option value="Todas">Todas</option>';
+    categorias.forEach(function(cat) {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = cat;
+        selectCat.appendChild(opt);
+    });
+
+    const actualizar = function() {
+        const filtradas = filtrarPiezas(inputBusqueda.value, selectCat.value);
+        renderizarTablaCatalogo(filtradas);
+    };
+    selectCat.addEventListener("change", actualizar);
+    inputBusqueda.addEventListener("input", actualizar);
+    if (btnBuscar) {
+        btnBuscar.addEventListener("click", actualizar);
+    }
+    actualizar();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    inicializarFiltroCategorias();
+});
